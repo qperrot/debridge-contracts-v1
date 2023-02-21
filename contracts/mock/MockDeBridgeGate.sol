@@ -54,7 +54,15 @@ contract MockDeBridgeGate is DeBridgeGate {
     ) public pure returns (bytes32) {
         return
             keccak256(
-                abi.encodePacked(SUBMISSION_PREFIX, _debridgeId, _chainIdFrom, _chainIdTo, _amount, _receiver, _nonce)
+                abi.encodePacked(
+                    SUBMISSION_PREFIX,
+                    _debridgeId,
+                    _chainIdFrom,
+                    _chainIdTo,
+                    _amount,
+                    _nonce,
+                    _receiver
+                )
             );
     }
 
