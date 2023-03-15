@@ -308,7 +308,7 @@ contract DeBridgeGate is
         if (isSubmissionUsed[submissionId]) revert SubmissionUsed();
         isSubmissionUsed[submissionId] = true;
 
-        // _checkConfirmations(submissionId, _debridgeId, _amount, _signatures);
+        _checkConfirmations(submissionId, _debridgeId, _amount, _signatures);
 
         bool isNativeToken = _claim(
             submissionId,
@@ -353,7 +353,7 @@ contract DeBridgeGate is
         bytes32 deployId = getDeployId(debridgeId, _name, _symbol, _decimals);
 
         // verify signatures
-        // ISignatureVerifier(signatureVerifier).submit(deployId, _signatures, excessConfirmations);
+        ISignatureVerifier(signatureVerifier).submit(deployId, _signatures, excessConfirmations);
 
         address deBridgeTokenAddress = IDeBridgeTokenDeployer(deBridgeTokenDeployer).deployAsset(
             debridgeId,
@@ -367,10 +367,9 @@ contract DeBridgeGate is
 
     /// @dev Update native fix fee. Called by our fee update contract
     /// @param _globalFixedNativeFee  new value
-    function autoUpdateFixedNativeFee(uint256 _globalFixedNativeFee)
-        external
-        onlyFeeContractUpdater
-    {
+    function autoUpdateFixedNativeFee(
+        uint256 _globalFixedNativeFee
+    ) external onlyFeeContractUpdater {
         globalFixedNativeFee = _globalFixedNativeFee;
         emit FixedNativeFeeAutoUpdated(_globalFixedNativeFee);
     }
@@ -400,10 +399,10 @@ contract DeBridgeGate is
     /// @dev Update fallbacks for fixed fee in native asset and transfer fee
     /// @param _globalFixedNativeFee Fallback fixed fee in native asset, used if a chain fixed fee is set to 0
     /// @param _globalTransferFeeBps Fallback transfer fee in BPS, used if a chain transfer fee is set to 0
-    function updateGlobalFee(uint256 _globalFixedNativeFee, uint16 _globalTransferFeeBps)
-        external
-        onlyAdmin
-    {
+    function updateGlobalFee(
+        uint256 _globalFixedNativeFee,
+        uint16 _globalTransferFeeBps
+    ) external onlyAdmin {
         globalFixedNativeFee = _globalFixedNativeFee;
         globalTransferFeeBps = _globalTransferFeeBps;
         emit FixedNativeFeeUpdated(_globalFixedNativeFee, _globalTransferFeeBps);
@@ -643,14 +642,7 @@ contract DeBridgeGate is
         uint256 _amount,
         uint256 _chainIdTo,
         bool _useAssetFee
-    )
-        internal
-        returns (
-            uint256 amountAfterFee,
-            bytes32 debridgeId,
-            FeeParams memory feeParams
-        )
-    {
+    ) internal returns (uint256 amountAfterFee, bytes32 debridgeId, FeeParams memory feeParams) {
         _validateToken(_tokenAddress);
 
         // Run _permit first. Avoid Stack too deep
@@ -983,15 +975,14 @@ contract DeBridgeGate is
      * @param _token address of token, zero for native tokens
      * @param __amount amount for rounding
      */
-    function _normalizeTokenAmount(address _token, uint256 _amount)
-        internal
-        view
-        returns (uint256)
-    {
+    function _normalizeTokenAmount(
+        address _token,
+        uint256 _amount
+    ) internal view returns (uint256) {
         uint256 decimals = _token == address(0) ? 18 : IERC20Metadata(_token).decimals();
         uint256 maxDecimals = 8;
         if (decimals > maxDecimals) {
-            uint256 multiplier = 10**(decimals - maxDecimals);
+            uint256 multiplier = 10 ** (decimals - maxDecimals);
             _amount = (_amount / multiplier) * multiplier;
         }
         return _amount;
@@ -1009,21 +1000,18 @@ contract DeBridgeGate is
     /// @dev Calculates asset identifier.
     /// @param _chainId Current chain id.
     /// @param _tokenAddress Address of the asset on the other chain.
-    function getbDebridgeId(uint256 _chainId, bytes memory _tokenAddress)
-        public
-        pure
-        returns (bytes32)
-    {
+    function getbDebridgeId(
+        uint256 _chainId,
+        bytes memory _tokenAddress
+    ) public pure returns (bytes32) {
         return keccak256(abi.encodePacked(_chainId, _tokenAddress));
     }
 
     /// @inheritdoc IDeBridgeGate
-    function getDebridgeChainAssetFixedFee(bytes32 _debridgeId, uint256 _chainId)
-        external
-        view
-        override
-        returns (uint256)
-    {
+    function getDebridgeChainAssetFixedFee(
+        bytes32 _debridgeId,
+        uint256 _chainId
+    ) external view override returns (uint256) {
         // if (!getDebridge[_debridgeId].exist) revert DebridgeNotFound();
         return getDebridgeFeeInfo[_debridgeId].getChainFee[_chainId];
     }
