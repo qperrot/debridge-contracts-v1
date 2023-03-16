@@ -794,8 +794,8 @@ contract DeBridgeGate is
             getChainId(),
             _chainIdTo,
             _amount,
-            nonce,
-            _receiver
+            _receiver,
+            nonce
         );
         if (hasAutoParams) {
             bool isHashedData = autoParams.flags.getFlag(Flags.SEND_HASHED_DATA);
@@ -803,12 +803,12 @@ contract DeBridgeGate is
             // auto submission
             submissionId = keccak256(
                 abi.encodePacked(
+                    packedSubmission,
                     autoParams.executionFee,
                     autoParams.flags,
                     keccak256(autoParams.fallbackAddress),
                     isHashedData ? autoParams.data : abi.encodePacked(keccak256(autoParams.data)),
-                    keccak256(abi.encodePacked(msg.sender)),
-                    packedSubmission
+                    keccak256(abi.encodePacked(msg.sender))
                 )
             );
         }
@@ -1041,8 +1041,8 @@ contract DeBridgeGate is
             _chainIdFrom,
             getChainId(),
             _amount,
-            _nonce,
-            _receiver
+            _receiver,
+            nonce
         );
         if (_hasAutoParams) {
             // Needed to let fallback address claim tokens in case user lost call data and can't restore its' hash
@@ -1054,14 +1054,14 @@ contract DeBridgeGate is
             return
                 keccak256(
                     abi.encodePacked(
+                        packedSubmission,
                         _autoParams.executionFee,
                         _autoParams.flags,
                         keccak256(abi.encodePacked(_autoParams.fallbackAddress)),
                         isHashedData
                             ? _autoParams.data
                             : abi.encodePacked(keccak256(_autoParams.data)),
-                        keccak256(_autoParams.nativeSender),
-                        packedSubmission
+                        keccak256(_autoParams.nativeSender)
                     )
                 );
         }
