@@ -1042,7 +1042,7 @@ contract DeBridgeGate is
             getChainId(),
             _amount,
             _receiver,
-            nonce
+            _nonce
         );
         if (_hasAutoParams) {
             // Needed to let fallback address claim tokens in case user lost call data and can't restore its' hash
